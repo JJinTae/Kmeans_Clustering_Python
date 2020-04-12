@@ -4,12 +4,11 @@ import math
 import matplotlib.pyplot as plt
 import Demode as de
 import Symbol as sym
+import tensorflow as tf
 import timeit
 
-# import tensorflow as tf
-# real = tf.constant(2.25)
-# imag = tf.constant(3.25)
-# tf.dtypes.complex(real, imag)
+tf.debugging.set_log_device_placement(True)
+
 
 QAM = 4
 Count_Total = 1
@@ -19,8 +18,11 @@ symbol = []
 SER = np.zeros(SNR)
 
 # Kmeans에 필요한 데이터
-init_center = [complex(1, 1), complex(-1, 1), complex(-1, -1), complex(1, -1)]
-dist = [[0]*symbol_num for i in range(4)] # 거리를 담을 4xn 배열
+init_center_real = tf.dtypes.cast(tf.constant([[1], [-1], [-1], [1]]), tf.double)
+init_center_imag = tf.dtypes.cast(tf.constant([[1], [1], [-1], [-1]]), tf.double)
+
+
+
 temp_Y = [[0]*symbol_num for i in range(4)] # 임시 심볼 값을 담을 4xn 배열
 
 # Matrix = [[0]*5 for i in range(7)]  열 행
@@ -28,8 +30,9 @@ temp_Y = [[0]*symbol_num for i in range(4)] # 임시 심볼 값을 담을 4xn �
 
 for count in range(Count_Total):
 
+    print(count)
     symbol = sym.Gensymbol(QAM, symbol_num)  # 초기 심볼
-    data_s = de.Demode(QAM, symbol)  # 초기 심볼 위치
+    data_s = de.Demode(QAM, symbol)  # 초기 심볼 위치 rsc err count
 
     for snr in range(SNR):
 
@@ -38,20 +41,27 @@ for count in range(Count_Total):
         position = np.zeros(symbol_num, int)  # 심볼의 사분면 위치를 담을 배열
         rsc_TakeCenter = [[0] * 4 for i in range(3)]
 
-        start = timeit.default_timer()
-        # Dist 부분
-        for i in range(symbol_num):
 
-            # dist 거리 재기
-            for j in range(4):
-                part_Real = math.pow(symbol_y[i].real - init_center[j].real, 2)
-                part_Imag = math.pow(symbol_y[i].imag - init_center[j].imag, 2)
-                dist[j][i] = math.sqrt(part_Real + part_Imag)
+        # 계산을 위해 담음
+        symbol_y = np.array(symbol_y) # real imag 배열을 나누기 위해 array로 담음
+        # symbol_real = tf.constant(symbol_y.real)
+        # symbol_imag = tf.constant(symbol_y.imag)
+        start = timeit.default_timer()
+        with tf.device('/GPU:0'):
+            temp_real = tf.pow(tf.subtract(symbol_y.real, init_center_real), 2)
+            temp_imag = tf.pow(tf.subtract(symbol_y.imag, init_center_imag), 2)
+            dist_temp = tf.sqrt(tf.add(temp_real, temp_imag))
+
+        dist = dist_temp.numpy()
+
         stop = timeit.default_timer()
 
+
+
+        # 보기쉽게 Dist를 구하는 부분과 Dist중 최솟값을 구하는 부분을 나눔
         for i in range(symbol_num):
-            # mindist 부분 - 사분면을 구함
             temp = 0
+            # mindist 부분 - 사분면을 구함
             for j in range(4):
                 if j == 0:
                     temp = dist[j][i]
@@ -70,12 +80,15 @@ for count in range(Count_Total):
                     rsc_TakeCenter[2][q] += 1
 
 
-
         # 새로운 초기점 생성
+        temp_center_real = np.zeros(shape=(QAM, 1))
+        temp_center_imag = np.zeros(shape=(QAM, 1))
         for v in range(4):
             if rsc_TakeCenter[2][v] != 0:
-                init_center[v] = complex(rsc_TakeCenter[0][v] / rsc_TakeCenter[2][v],
-                                         rsc_TakeCenter[1][v] / rsc_TakeCenter[2][v])
+                temp_center_real[v][0] = rsc_TakeCenter[0][v] / rsc_TakeCenter[2][v]
+                temp_center_imag[v][0] = rsc_TakeCenter[1][v] / rsc_TakeCenter[2][v]
+        init_center_real = tf.dtypes.cast(tf.constant(temp_center_real), tf.double)
+        init_center_imag = tf.dtypes.cast(tf.constant(temp_center_imag), tf.double)
 
         data_y = de.Demode(QAM, symbol_y)
 
