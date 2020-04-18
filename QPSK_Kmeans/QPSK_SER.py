@@ -61,7 +61,7 @@ for count in range(Count_Total):
                 if dist[k][i] == temp:
                     position[i] = k
             # center점 수정
-            temp_Y[position[i]][i] = symbol_y[k]  # 임시 temp_Y를 만들어주고
+            temp_Y[position[i]][i] = symbol_y[i]  # 임시 temp_Y를 만들어주고
 
             for q in range(4):
                 if position[i] == q:
