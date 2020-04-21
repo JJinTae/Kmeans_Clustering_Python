@@ -15,7 +15,7 @@ def Est_Ch(center, Hk):
 
     for i in range(4):
         for j in range(4):
-            if(theta[i] < theta[j]):
+            if theta[i] < theta[j]:
                 theta_temp = theta[i]
                 theta[i] = theta[j]
                 theta[j] = theta_temp

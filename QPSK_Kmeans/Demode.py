@@ -48,7 +48,7 @@ def Demode(qam ,Symbol):
                 data_real = 3
             elif Symbol[i].real > 4 / Mean and Symbol[i].real <= 6 / Mean:
                 data_real = 5
-            elif Symbol[i].real > 6:
+            elif Symbol[i].real > 6 / Mean:
                 data_real = 7
 
             if Symbol[i].real <= -6 / Mean:
@@ -66,7 +66,7 @@ def Demode(qam ,Symbol):
                 data_imag = 3
             elif Symbol[i].imag > 4 / Mean and Symbol[i].imag <= 6 / Mean:
                 data_imag = 5
-            elif Symbol[i].imag > 6:
+            elif Symbol[i].imag > 6 / Mean:
                 data_imag = 7
 
             if Symbol[i].imag <= -6 / Mean:

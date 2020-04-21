@@ -16,16 +16,15 @@ def Gensymbol(qam, symbol_num):
         for i in range(symbol_num):
             ComArray.append(complex(point[rnd.randrange(0,4)]/Mean, point[rnd.randrange(0,4)]/Mean))
 
-
     elif qam == 64:
         Mean = math.sqrt(42)
         for i in range(symbol_num):
-            ComArray.append(complex(point[rnd.randrange(0, 8)] / Mean, point[rnd.randrange(0, 4)] / Mean))
+            ComArray.append(complex(point[rnd.randrange(0, 8)] / Mean, point[rnd.randrange(0, 8)] / Mean))
 
     elif qam == 256:
         Mean = math.sqrt(340)
         for i in range(symbol_num):
-            ComArray.append(complex(point[rnd.randrange(0, 16)] / Mean, point[rnd.randrange(0, 4)] / Mean))
+            ComArray.append(complex(point[rnd.randrange(0, 16)] / Mean, point[rnd.randrange(0, 16)] / Mean))
 
     return ComArray
 
@@ -50,13 +49,15 @@ def Gen_ch():
     return complex(CH_RE, CH_IM)
 
 def MultyCh(symbol, ch):
+    ComArray = []
     for i in range(len(symbol)):
-        symbol[i] = symbol[i] * ch
+        ComArray.append(symbol[i] * ch)
 
-    return symbol
+    return ComArray
 
 def DividCh(symbol, ch):
+    ComArray = []
     for i in range(len(symbol)):
-        symbol[i] = symbol[i] / ch
+        ComArray.append(symbol[i] / ch)
 
-    return symbol
+    return ComArray
